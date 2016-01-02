@@ -1,5 +1,6 @@
 package com.sparkmvc.model;
 
+import com.sparkmvc.init.Config;
 import org.reflections.Reflections;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.util.Set;
 /**
  * Created by Nurmuhammad on 27-Nov-15.
  */
+
 public abstract class aModel implements Serializable {
 
     private static final Map<Class<? extends aModel>, Map<String, String>> columnMaps = new HashMap<>();
@@ -21,7 +23,7 @@ public abstract class aModel implements Serializable {
             return columnMaps;
         }
 
-        Reflections reflections = new Reflections(aModel.class.getPackage().getName());
+        Reflections reflections = new Reflections(Config.get("scan.package", "com"));
 
         Set<Class<? extends aModel>> classes = reflections.getSubTypesOf(aModel.class);
 

@@ -46,7 +46,7 @@ public class PoolService {
         System.gc();
     }
 
-    private ComboPooledDataSource getComboPooledDataSource() throws PropertyVetoException {
+    private synchronized ComboPooledDataSource getComboPooledDataSource() throws PropertyVetoException {
 
         if(cpds!=null) return cpds;
 
@@ -65,7 +65,7 @@ public class PoolService {
         return cpds;
     }
 
-    public static ComboPooledDataSource getDataSource(){
+    public static synchronized ComboPooledDataSource getDataSource(){
         try {
             return getInstance().getComboPooledDataSource();
         } catch (PropertyVetoException e) {

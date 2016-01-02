@@ -7,6 +7,8 @@ public @interface Template {
 
     TemplateEngine value() default TemplateEngine.FREEMARKER;
 
+    String viewName() default Constants.NULL_VALUE;
+
     enum TemplateEngine {
         FREEMARKER, VLOCITY
     }

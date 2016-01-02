@@ -25,6 +25,7 @@
         <jdk.version>1.8</jdk.version>
         <spark.version>2.3</spark.version>
         <spark.freemarker.version>2.3</spark.freemarker.version>
+        <spark.velocity.version>2.3</spark.velocity.version>
         <freemarker.version>2.3.23</freemarker.version>
         <slf4j.version>1.7.13</slf4j.version>
         <sql2o.version>1.5.4</sql2o.version>
@@ -53,6 +54,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-template-velocity</artifactId>
+            <version>${spark.velocity.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
             <version>${freemarker.version}</version>
@@ -62,12 +69,6 @@
             <groupId>org.sql2o</groupId>
             <artifactId>sql2o</artifactId>
             <version>${sql2o.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.connector.version}</version>
         </dependency>
 
         <dependency>
@@ -122,6 +123,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz-jobs</artifactId>

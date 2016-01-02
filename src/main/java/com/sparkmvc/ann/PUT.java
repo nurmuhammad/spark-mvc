@@ -13,5 +13,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface PUT {
-    String uri() default "";
+    String uri() default Constants.NULL_VALUE;
 }

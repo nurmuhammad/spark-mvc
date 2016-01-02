@@ -4,7 +4,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
@@ -12,13 +11,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Page {
-
+@Target(METHOD)
+public @interface TRACE {
     String uri() default Constants.NULL_VALUE;
-
-    Template.TemplateEngine value() default Template.TemplateEngine.FREEMARKER;
-
-    String viewName() default Constants.NULL_VALUE;
-
 }

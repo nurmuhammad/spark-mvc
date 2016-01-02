@@ -14,6 +14,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target(METHOD)
 public @interface After {
 
-    String uri() default "";
+    String uri() default Constants.NULL_VALUE;
 
 }
