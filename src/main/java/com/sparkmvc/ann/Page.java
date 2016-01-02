@@ -8,7 +8,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Created by Nurmuhammad on 29-Dec-15.
+ * @author nurmuhammad
  */
 
 @Retention(RUNTIME)
@@ -16,6 +16,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Page {
 
     String uri() default Constants.NULL_VALUE;
+
+    boolean absolutePath() default false;
 
     Template.TemplateEngine value() default Template.TemplateEngine.FREEMARKER;
 

@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by Nurmuhammad on 27-Nov-15.
+ * @author nurmuhammad
+ *
  */
 
 public abstract class aModel implements Serializable {

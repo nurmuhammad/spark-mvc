@@ -16,6 +16,7 @@ import java.util.Map;
 /**
  * @author nurmuhammad
  */
+
 public abstract class GenericDao<E> {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericDao.class);
@@ -33,7 +34,7 @@ public abstract class GenericDao<E> {
         }
     }
 
-    public Sql2o sql2o(){
+    public Sql2o sql2o() {
         try {
             return pool.borrowObject();
 
@@ -44,7 +45,7 @@ public abstract class GenericDao<E> {
         return new Sql2o(PoolService.getDataSource());
     }
 
-    public void returnSql2o(Sql2o sql2o){
+    public void returnSql2o(Sql2o sql2o) {
         try {
             sql2o.getDefaultColumnMappings().clear();
             pool.returnObject(sql2o);
@@ -53,7 +54,7 @@ public abstract class GenericDao<E> {
         }
     }
 
-    public Query addColumnMapping(Query query){
+    public Query addColumnMapping(Query query) {
         Map<String, String> map = aModel.getColumnMaps().get(className);
         map.keySet().stream().forEach(s -> {
             query.addColumnMapping(s, map.get(s));

@@ -1,8 +1,16 @@
 package com.sparkmvc.ann;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 /**
- * Created by Nurmuhammad on 29-Dec-15.
+ * @author nurmuhammad
  */
+@Retention(RUNTIME)
+@Target(METHOD)
 public @interface Template {
 
     TemplateEngine value() default TemplateEngine.FREEMARKER;
@@ -10,7 +18,7 @@ public @interface Template {
     String viewName() default Constants.NULL_VALUE;
 
     enum TemplateEngine {
-        FREEMARKER, VLOCITY
+        FREEMARKER, VELOCITY
     }
 
 }

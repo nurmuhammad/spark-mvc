@@ -10,8 +10,10 @@ import java.sql.SQLException;
 
 
 /**
- * Created by Nurmuhammad on 28-Nov-15.
+ * @author nurmuhammad
+ *
  */
+
 public class PoolService {
 
     private static final Logger logger = LoggerFactory.getLogger(PoolService.class);

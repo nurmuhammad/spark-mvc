@@ -19,9 +19,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static spark.Spark.before;
+import static spark.Spark.after;
+
 /**
- * Created by Nurmuhammad on 01-Jan-16.
+ * @author nurmuhammad
  */
+
 public class Application {
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
@@ -31,7 +35,7 @@ public class Application {
 
     static {
         templateMap.put(Template.TemplateEngine.FREEMARKER, new FreeMarkerEngine());
-        templateMap.put(Template.TemplateEngine.VLOCITY, new VelocityTemplateEngine());
+        templateMap.put(Template.TemplateEngine.VELOCITY, new VelocityTemplateEngine());
     }
 
     static Map<String, Method> methods = new HashMap<>();
@@ -47,11 +51,11 @@ public class Application {
         Set<Class<?>> controllers = reflections.getTypesAnnotatedWith(Controller.class);
 
         Set<Method> gets = reflections.getMethodsAnnotatedWith(GET.class);
-        Set<Method> puts = reflections.getMethodsAnnotatedWith(PUT.class);
         Set<Method> posts = reflections.getMethodsAnnotatedWith(POST.class);
+        Set<Method> puts = reflections.getMethodsAnnotatedWith(PUT.class);
         Set<Method> deletes = reflections.getMethodsAnnotatedWith(DELETE.class);
-        Set<Method> connects = reflections.getMethodsAnnotatedWith(CONNECT.class);
         Set<Method> heads = reflections.getMethodsAnnotatedWith(HEAD.class);
+        Set<Method> connects = reflections.getMethodsAnnotatedWith(CONNECT.class);
         Set<Method> options = reflections.getMethodsAnnotatedWith(OPTIONS.class);
         Set<Method> traces = reflections.getMethodsAnnotatedWith(TRACE.class);
 
@@ -87,6 +91,20 @@ public class Application {
         httpMethods(options, OPTIONS.class);
         httpMethods(traces, TRACE.class);
 
+
+        for (Method method : befores) {
+            Class<?> aClass = method.getDeclaringClass();
+            Object controller = controllersMap.get(aClass);
+            Before before = method.getAnnotation(Before.class);
+            initBeforeFilter(before, controller, method);
+        }
+
+        for (Method method : afters) {
+            Class<?> aClass = method.getDeclaringClass();
+            Object controller = controllersMap.get(aClass);
+            After after = method.getAnnotation(After.class);
+            initAfterFilter(after, controller, method);
+        }
     }
 
     private static void collectMethods(String... methodNames) {
@@ -117,16 +135,18 @@ public class Application {
             String httpMethodName = annotation.annotationType().getSimpleName().toLowerCase();
             Method uriMethod = annotation.getClass().getDeclaredMethod("uri");
             String uri = (String) uriMethod.invoke(annotation);
+            Method absolutePathMethod = annotation.getClass().getDeclaredMethod("absolutePath");
+            boolean absolutePath = (boolean) absolutePathMethod.invoke(annotation);
 
             logger.info("SparkMVC: Initializing @" + httpMethodName.toUpperCase() + " method by " + aClass.getName() + "." + method.getName() + "()");
-            initMethod(httpMethodName, uri, controller, method);
+            initMethod(httpMethodName, uri, controller, method, absolutePath);
         }
     }
 
-    public static void initMethod(String httpMethodName, String uri, Object instance, Method method) throws InvocationTargetException, IllegalAccessException {
+    public static void initMethod(String httpMethodName, String uri, Object instance, Method method, boolean absolutePath) throws InvocationTargetException, IllegalAccessException {
         Controller controller = instance.getClass().getAnnotation(Controller.class);
-        String path = path(controller.url(), uri, method);
-        logger.info("SparkMVC: uri = " + path);
+        String path = path(absolutePath ? "" : controller.url(), uri, method);
+        logger.info("SparkMVC: " + httpMethodName + "(uri = " + path + ")");
 
         Template template = null;
         if (method.isAnnotationPresent(Template.class)) {
@@ -165,14 +185,59 @@ public class Application {
 
     }
 
+    public static void initBeforeFilter(Before before, Object instance, Method method) {
+
+        logger.info("SparkMVC: Initializing @Before filter to " + instance.getClass().getName() + "." + method.getName());
+
+        if (before.absolutePath() && Constants.NULL_VALUE.equals(before.uri())) {
+            before((request, response) -> method.invoke(instance, request, response));
+            return;
+        }
+
+        if (before.absolutePath()) {
+            String path = before.uri().startsWith("/") ? before.uri() : "/" + before.uri();
+            before(path, (request, response) -> method.invoke(instance, request, response));
+            return;
+        }
+
+        Controller controller = instance.getClass().getAnnotation(Controller.class);
+        String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(before.uri()) ? "*" : before.uri()))
+                .replaceAll("//", "/").replaceAll("//", "/");
+        before(path, (request, response) -> method.invoke(instance, request, response));
+    }
+
+    public static void initAfterFilter(After after, Object instance, Method method) {
+
+        logger.info("SparkMVC: Initializing @After filter to " + instance.getClass().getName() + "." + method.getName());
+
+        if (after.absolutePath() && Constants.NULL_VALUE.equals(after.uri())) {
+            after((request, response) -> method.invoke(instance, request, response));
+            return;
+        }
+
+        if (after.absolutePath()) {
+            String path = after.uri().startsWith("/") ? after.uri() : "/" + after.uri();
+            after(path, (request, response) -> method.invoke(instance, request, response));
+            return;
+        }
+
+        Controller controller = instance.getClass().getAnnotation(Controller.class);
+        String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(after.uri()) ? "*" : after.uri()))
+                .replaceAll("//", "/").replaceAll("//", "/");
+        after(path, (request, response) -> method.invoke(instance, request, response));
+    }
+
     static String path(String controllerUri, String methodUri, Method method) {
         if (Constants.NULL_VALUE.equals(methodUri)) {
             String regex = "([a-z])([A-Z])";
             String replacement = "$1-$2";
             methodUri = method.getName().replaceAll(regex, replacement).toLowerCase();
         }
-        return (controllerUri + "/" + methodUri)
+
+        String path = (controllerUri + "/" + methodUri)
                 .replaceAll("//", "/").replaceAll("//", "/");
+        return (path.startsWith("/")) ? path : "/" + path;
+
     }
 
 }

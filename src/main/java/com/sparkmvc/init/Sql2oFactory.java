@@ -6,8 +6,10 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.sql2o.Sql2o;
 
 /**
- * Created by Nurmuhammad on 29-Nov-15.
+ * @author nurmuhammad
+ *
  */
+
 public class Sql2oFactory extends BasePooledObjectFactory<Sql2o> {
 
     @Override

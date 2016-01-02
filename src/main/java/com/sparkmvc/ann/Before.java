@@ -7,7 +7,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Created by Nurmuhammad on 29-Dec-15.
+ * @author nurmuhammad
  */
 
 @Retention(RUNTIME)
@@ -16,4 +16,5 @@ public @interface Before {
 
     String uri() default Constants.NULL_VALUE;
 
+    boolean absolutePath() default false;
 }
