@@ -64,6 +64,10 @@ public class PoolService {
         cpds.setMaxStatements(Config.get("ds.pool.max-statements", 600));
         cpds.setMaxStatementsPerConnection(Config.get("ds.pool.max-statements-per-connection", 60));
 
+        cpds.setAcquireIncrement(Config.get("ds.pool.acquire-increment", 3));
+        cpds.setAcquireRetryAttempts(Config.get("ds.pool.acquire-retry-attempts", 30));
+        cpds.setAcquireRetryDelay(Config.get("ds.pool.acquire-retry-delay", 1000));
+
         return cpds;
     }
 
