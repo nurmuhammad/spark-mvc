@@ -17,4 +17,5 @@ public @interface Before {
     String uri() default Constants.NULL_VALUE;
 
     boolean absolutePath() default false;
+
 }

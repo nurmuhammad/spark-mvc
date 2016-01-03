@@ -24,12 +24,10 @@ public class Sql2oFactory extends BasePooledObjectFactory<Sql2o> {
 
     @Override
     public void passivateObject(PooledObject<Sql2o> pooledObject) {
-
     }
 
     @Override
     public void destroyObject(PooledObject<Sql2o> pooledObject) throws Exception  {
-
     }
 
 }

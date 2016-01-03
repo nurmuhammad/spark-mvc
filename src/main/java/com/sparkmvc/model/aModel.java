@@ -11,7 +11,6 @@ import java.util.Set;
 
 /**
  * @author nurmuhammad
- *
  */
 
 public abstract class aModel implements Serializable {
@@ -20,7 +19,7 @@ public abstract class aModel implements Serializable {
 
     public static Map<Class<? extends aModel>, Map<String, String>> getColumnMaps() {
 
-        if(!columnMaps.isEmpty()){
+        if (!columnMaps.isEmpty()) {
             return columnMaps;
         }
 
@@ -31,12 +30,12 @@ public abstract class aModel implements Serializable {
         final String regex = "([a-z])([A-Z])";
         final String replacement = "$1_$2";
         classes.stream().forEach(aClass -> {
-            for (Field field: aClass.getFields()){
+            for (Field field : aClass.getFields()) {
                 String name = field.getName();
                 name = name.replaceAll(regex, replacement).toLowerCase();
-                if(field.getName().equals(name)) continue;
+                if (field.getName().equals(name)) continue;
                 Map<String, String> map = columnMaps.get(aClass);
-                if(map==null){
+                if (map == null) {
                     map = new HashMap<>();
                     columnMaps.put(aClass, map);
                 }

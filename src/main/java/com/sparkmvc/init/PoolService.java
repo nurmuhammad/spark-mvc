@@ -86,6 +86,7 @@ public class PoolService {
         } catch (SQLException e) {
             logger.error("Error when get connection from the pool.", e);
             throw new RuntimeException("Error when get connection from the pool.");
+
         }
     }
 
