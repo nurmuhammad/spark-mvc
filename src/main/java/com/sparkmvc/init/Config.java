@@ -43,6 +43,7 @@ public class Config {
     public static int get(String key, int defaultValue){
         try {
             String toret = getInstance().properties.getProperty(key, String.valueOf(defaultValue));
+
             return Integer.valueOf(toret);
         } catch (NumberFormatException e) {
             logger.warn("Getting key by '"+key+"', throws exception. ", e);

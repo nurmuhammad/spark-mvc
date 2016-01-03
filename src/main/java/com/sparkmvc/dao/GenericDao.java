@@ -25,6 +25,7 @@ public abstract class GenericDao<E> {
 
     public Class<E> className;
 
+    @SuppressWarnings("unchecked")
     public GenericDao() {
         try {
             className = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];

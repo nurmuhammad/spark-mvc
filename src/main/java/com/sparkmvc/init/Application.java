@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static spark.Spark.before;
 import static spark.Spark.after;
+import static spark.Spark.before;
 
 /**
  * @author nurmuhammad
@@ -71,6 +71,7 @@ public class Application {
                 if (aClass.equals(method.getDeclaringClass())) {
                     try {
                         logger.info("SparkMVC: Initializing " + aClass.getName() + "." + method.getName() + "()...");
+                        method.setAccessible(true);
                         method.invoke(instance);
                         return;
                     } catch (Exception e) {
@@ -160,7 +161,7 @@ public class Application {
 
         if (template == null && json == null) {
             Method sparkMethod = methods.get(httpMethodName);
-            sparkMethod.invoke(null, path, (Route) (request, response) -> method.invoke(instance, request, response));
+            sparkMethod.invoke(null, path, (Route) (request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
@@ -168,7 +169,7 @@ public class Application {
             final String viewName = template.viewName();
             Method sparkMethod = methods.get(httpMethodName + "_template");
             sparkMethod.invoke(null, path, (TemplateViewRoute) (request, response) -> {
-                Object result = method.invoke(instance, request, response);
+                Object result = methodInvoke(method, instance, request, response);
                 if (result instanceof ModelAndView) {
                     return (ModelAndView) result;
                 }
@@ -180,30 +181,31 @@ public class Application {
         Method sparkMethod = methods.get(httpMethodName + "_json");
         sparkMethod.invoke(null, path, (Route) (request, response) -> {
             response.type("application/json");
-            return method.invoke(instance, request, response);
+            return methodInvoke(method, instance, request, response);
         }, (ResponseTransformer) GSON::toJson);
 
     }
 
-    public static void initBeforeFilter(Before before, Object instance, Method method) {
+    public static void initBeforeFilter(Before before, Object instance, Method method) throws Throwable {
 
         logger.info("SparkMVC: Initializing @Before filter to " + instance.getClass().getName() + "." + method.getName());
 
         if (before.absolutePath() && Constants.NULL_VALUE.equals(before.uri())) {
-            before((request, response) -> method.invoke(instance, request, response));
+            before((request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
         if (before.absolutePath()) {
             String path = before.uri().startsWith("/") ? before.uri() : "/" + before.uri();
-            before(path, (request, response) -> method.invoke(instance, request, response));
+            before(path, (request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
         Controller controller = instance.getClass().getAnnotation(Controller.class);
         String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(before.uri()) ? "*" : before.uri()))
                 .replaceAll("//", "/").replaceAll("//", "/");
-        before(path, (request, response) -> method.invoke(instance, request, response));
+        path = path.startsWith("/") ? path : "/" + path;
+        before(path, (request, response) -> methodInvoke(method, instance, request, response));
     }
 
     public static void initAfterFilter(After after, Object instance, Method method) {
@@ -211,20 +213,33 @@ public class Application {
         logger.info("SparkMVC: Initializing @After filter to " + instance.getClass().getName() + "." + method.getName());
 
         if (after.absolutePath() && Constants.NULL_VALUE.equals(after.uri())) {
-            after((request, response) -> method.invoke(instance, request, response));
+            after((request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
         if (after.absolutePath()) {
             String path = after.uri().startsWith("/") ? after.uri() : "/" + after.uri();
-            after(path, (request, response) -> method.invoke(instance, request, response));
+            after(path, (request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
         Controller controller = instance.getClass().getAnnotation(Controller.class);
         String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(after.uri()) ? "*" : after.uri()))
                 .replaceAll("//", "/").replaceAll("//", "/");
-        after(path, (request, response) -> method.invoke(instance, request, response));
+        path = path.startsWith("/") ? path : "/" + path;
+        after(path, (request, response) -> methodInvoke(method, instance, request, response));
+    }
+
+    private static Object methodInvoke(Method method, Object instance, Object... args) throws Exception {
+        try {
+            method.setAccessible(true);
+            return method.invoke(instance, args);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw e;
+        }
     }
 
     static String path(String controllerUri, String methodUri, Method method) {
