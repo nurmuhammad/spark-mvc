@@ -57,6 +57,7 @@ public abstract class GenericDao<E> {
 
     public Query addColumnMapping(Query query) {
         Map<String, String> map = aModel.getColumnMaps().get(className);
+        if (map == null || map.isEmpty()) return query;
         map.keySet().stream().forEach(s -> {
             query.addColumnMapping(s, map.get(s));
         });
