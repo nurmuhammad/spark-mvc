@@ -35,10 +35,9 @@ public abstract class GenericDao<E> {
         }
     }
 
-    public Sql2o sql2o() {
+    public synchronized Sql2o sql2o() {
         try {
             return pool.borrowObject();
-
         } catch (Exception e) {
             logger.error("Throws error when borrowing Sql2o object from the pool.", e);
         }
