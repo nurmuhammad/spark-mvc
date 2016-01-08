@@ -2,9 +2,6 @@ package com.sparkmvc.init;
 
 import com.google.gson.Gson;
 import com.sparkmvc.ann.*;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.HTreeMap;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -45,24 +42,7 @@ public class Application {
 
     public static Gson GSON = new Gson();
 
-    static Map<String, Long> cacheLifes = new HashMap<>();
-
-    static DB db = DBMaker
-            .newTempFileDB()
-            .transactionDisable()
-            .closeOnJvmShutdown()
-            .cacheLRUEnable()
-            .mmapFileEnableIfSupported()
-            .make();
-
-    static HTreeMap<String, Object> cacheMap = db.getHashMap("CacheObjects");
-
     public static void init() throws Throwable {
-
-        DB db = DBMaker.newTempFileDB()
-                .closeOnJvmShutdown()
-                .encryptionEnable("password")
-                .make();
 
         collectMethods("get", "put", "post", "delete", "head", "connect", "options", "trace");
 
@@ -180,24 +160,21 @@ public class Application {
         }
 
         final Cacheable cacheable = method.isAnnotationPresent(Cacheable.class) ? method.getAnnotation(Cacheable.class) : null;
+        String cacheKey = cacheable == null ? null : instance.getClass().getSimpleName() + "." + httpMethodName + "." + path;
 
         if (template == null && json == null) {
             Method sparkMethod = methods.get(httpMethodName);
             if (cacheable == null) {
                 sparkMethod.invoke(null, path, (Route) (request, response) -> methodInvoke(method, instance, request, response));
             } else {
-                String cacheName = instance.getClass().getSimpleName() + "." + httpMethodName + "." + path;
                 sparkMethod.invoke(null, path, (Route) (request, response) -> {
 
-                    Object result = getFromCache(cacheName, cacheable);
+                    Object result = Cache.get(cacheKey);
                     if (result != null)
                         return result;
 
                     result = methodInvoke(method, instance, request, response);
-                    cacheLifes.put(cacheName, System.currentTimeMillis());
-                    cacheMap.put(cacheName, result);
-
-                    return result;
+                    return Cache.put(cacheKey, result, cacheable.expire());
                 });
             }
             return;
@@ -215,14 +192,13 @@ public class Application {
             }, templateMap.get(template.value()));
             return;
         } else if (template != null) {
-            String cacheName = instance.getClass().getSimpleName() + "." + httpMethodName + "." + path;
 
             final String viewName = template.viewName();
             Method sparkMethod = methods.get(httpMethodName);
             TemplateEngine engine = templateMap.get(template.value());
 
             sparkMethod.invoke(null, path, (Route) (request, response) -> {
-                Object result = getFromCache(cacheName, cacheable);
+                Object result = Cache.get(cacheKey);
                 if (result != null)
                     return result;
 
@@ -233,10 +209,7 @@ public class Application {
                     result = engine.render(Spark.modelAndView(result, viewName));
                 }
 
-                cacheLifes.put(cacheName, System.currentTimeMillis());
-                cacheMap.put(cacheName, result);
-
-                return result;
+                return Cache.put(cacheKey, result, cacheable.expire());
 
             });
             return;
@@ -249,23 +222,19 @@ public class Application {
                 return methodInvoke(method, instance, request, response);
             }, (ResponseTransformer) GSON::toJson);
         } else {
-            String cacheName = instance.getClass().getSimpleName() + "." + httpMethodName + "." + path;
-
             Method sparkMethod = methods.get(httpMethodName);
             sparkMethod.invoke(null, path, (Route) (request, response) -> {
                 response.type("application/json");
 
-                Object result = getFromCache(cacheName, cacheable);
+                Object result = Cache.get(cacheKey);
                 if (result != null)
                     return result;
 
                 result = methodInvoke(method, instance, request, response);
                 result = GSON.toJson(result);
 
-                cacheLifes.put(cacheName, System.currentTimeMillis());
-                cacheMap.put(cacheName, result);
+                return Cache.put(cacheKey, result, cacheable.expire());
 
-                return result;
             });
         }
 
@@ -340,11 +309,4 @@ public class Application {
 
     }
 
-    static Object getFromCache(String cacheName, Cacheable cacheable) {
-        Long last = cacheLifes.get(cacheName);
-        if (last != null && ((last + cacheable.expire()) > System.currentTimeMillis())) {
-            return cacheMap.get(cacheName);
-        }
-        return null;
-    }
 }
