@@ -26,12 +26,12 @@
         <spark.version>2.3</spark.version>
         <spark.freemarker.version>2.3</spark.freemarker.version>
         <spark.velocity.version>2.3</spark.velocity.version>
+        <spark.mustache.version>2.3</spark.mustache.version>
+        <spark.pebble.version>2.3</spark.pebble.version>
         <freemarker.version>2.3.23</freemarker.version>
         <slf4j.version>1.7.13</slf4j.version>
         <sql2o.version>1.5.4</sql2o.version>
-        <mysql.connector.version>5.1.37</mysql.connector.version>
     </properties>
-	
 
     <dependencies>
 
@@ -60,10 +60,34 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-template-mustache</artifactId>
+            <version>${spark.mustache.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-template-pebble</artifactId>
+            <version>${spark.pebble.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
             <version>${freemarker.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>com.mitchellbosecke</groupId>-->
+            <!--<artifactId>pebble</artifactId>-->
+            <!--<version>2.0.0</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.sql2o</groupId>

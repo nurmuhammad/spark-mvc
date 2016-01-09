@@ -18,7 +18,7 @@ public @interface Template {
     String viewName() default Constants.NULL_VALUE;
 
     enum TemplateEngine {
-        FREEMARKER, VELOCITY
+        FREEMARKER, VELOCITY, MUSTACHE, PEBBLE
     }
 
 }

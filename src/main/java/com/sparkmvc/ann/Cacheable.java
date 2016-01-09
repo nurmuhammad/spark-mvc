@@ -13,5 +13,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface Cacheable {
-    long expire() default 0; // life time in milliseconds
+    long expire(); // life time in milliseconds
 }

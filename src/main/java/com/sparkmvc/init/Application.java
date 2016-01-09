@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
+import spark.template.mustache.MustacheTemplateEngine;
+import spark.template.pebble.PebbleTemplateEngine;
 import spark.template.velocity.VelocityTemplateEngine;
 
 import java.lang.annotation.Annotation;
@@ -36,6 +38,8 @@ public class Application {
     static {
         templateMap.put(Template.TemplateEngine.FREEMARKER, new FreeMarkerEngine());
         templateMap.put(Template.TemplateEngine.VELOCITY, new VelocityTemplateEngine());
+        templateMap.put(Template.TemplateEngine.MUSTACHE, new MustacheTemplateEngine());
+        templateMap.put(Template.TemplateEngine.PEBBLE, new PebbleTemplateEngine());
     }
 
     static Map<String, Method> methods = new HashMap<>();
