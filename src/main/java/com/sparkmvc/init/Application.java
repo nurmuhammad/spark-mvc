@@ -2,6 +2,9 @@ package com.sparkmvc.init;
 
 import com.google.gson.Gson;
 import com.sparkmvc.ann.*;
+import com.sparkmvc.engine.FreeMarkerEngine;
+import com.sparkmvc.engine.MustacheTemplateEngine;
+import com.sparkmvc.engine.PebbleTemplateEngine;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -9,9 +12,6 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.*;
-import spark.template.freemarker.FreeMarkerEngine;
-import spark.template.mustache.MustacheTemplateEngine;
-import spark.template.pebble.PebbleTemplateEngine;
 import spark.template.velocity.VelocityTemplateEngine;
 
 import java.lang.annotation.Annotation;
@@ -153,18 +153,10 @@ public class Application {
         String path = path(absolutePath ? "" : controller.url(), uri, method);
         logger.info("SparkMVC: " + httpMethodName + "(uri = " + path + ")");
 
-        Template template = null;
-        if (method.isAnnotationPresent(Template.class)) {
-            template = method.getAnnotation(Template.class);
-        }
+        Template template = method.getAnnotation(Template.class);
+        Json json = method.getAnnotation(Json.class);
 
-        Json json = null;
-        if (method.isAnnotationPresent(Json.class)) {
-            json = method.getAnnotation(Json.class);
-        }
-
-        final Cacheable cacheable = method.isAnnotationPresent(Cacheable.class) ? method.getAnnotation(Cacheable.class) : null;
-        String cacheKey = cacheable == null ? null : instance.getClass().getSimpleName() + "." + httpMethodName + "." + path;
+        final Cacheable cacheable = method.getAnnotation(Cacheable.class);
 
         if (template == null && json == null) {
             Method sparkMethod = methods.get(httpMethodName);
@@ -172,6 +164,7 @@ public class Application {
                 sparkMethod.invoke(null, path, (Route) (request, response) -> methodInvoke(method, instance, request, response));
             } else {
                 sparkMethod.invoke(null, path, (Route) (request, response) -> {
+                    String cacheKey = cacheKey(instance, request);
 
                     Object result = Cache.get(cacheKey);
                     if (result != null)
@@ -202,6 +195,7 @@ public class Application {
             TemplateEngine engine = templateMap.get(template.value());
 
             sparkMethod.invoke(null, path, (Route) (request, response) -> {
+                String cacheKey = cacheKey(instance, request);
                 Object result = Cache.get(cacheKey);
                 if (result != null)
                     return result;
@@ -229,7 +223,7 @@ public class Application {
             Method sparkMethod = methods.get(httpMethodName);
             sparkMethod.invoke(null, path, (Route) (request, response) -> {
                 response.type("application/json");
-
+                String cacheKey = cacheKey(instance, request);
                 Object result = Cache.get(cacheKey);
                 if (result != null)
                     return result;
@@ -311,6 +305,28 @@ public class Application {
                 .replaceAll("//", "/").replaceAll("//", "/");
         return (path.startsWith("/")) ? path : "/" + path;
 
+    }
+
+    static String cacheKey(Object controller, Request request) {
+
+        StringBuilder builder = new StringBuilder("URL.")
+                .append(controller.getClass().getName())
+                .append(".")
+                .append(request.requestMethod())
+                .append(".")
+                .append(request.scheme())
+                .append("://")
+                .append(request.host());
+
+        if (request.pathInfo() != null) {
+            builder.append(request.pathInfo());
+        }
+        if (request.queryString() != null) {
+            builder.append("?")
+                    .append(request.queryString());
+        }
+
+        return builder.toString();
     }
 
 }
