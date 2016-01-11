@@ -1,6 +1,7 @@
 package com.sparkmvc.init;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sparkmvc.ann.*;
 import com.sparkmvc.engine.FreeMarkerEngine;
 import com.sparkmvc.engine.MustacheTemplateEngine;
@@ -44,7 +45,7 @@ public class Application {
 
     static Map<String, Method> methods = new HashMap<>();
 
-    public static Gson GSON = new Gson();
+    public static Gson GSON = new GsonBuilder().setExclusionStrategies(new AnnotationSkipStrategy()).create();
 
     public static void init() throws Throwable {
 

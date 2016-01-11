@@ -33,6 +33,37 @@ public class $ {
         return hc.toString();
     }
 
+    public static String runFolder() {
+        String runFolder;
+        try {
+            runFolder = URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource(".").getPath(), "UTF-8");
+            File tempFile = new File(runFolder);
+            if (tempFile.isDirectory()) {
+                runFolder = tempFile.getPath();
+            } else runFolder = null;
+        } catch (Throwable ignored) {
+            runFolder = null;
+        }
+
+        try {
+            if (runFolder == null) {
+                File file = new java.io.File($.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                if (file.exists() && file.isFile()) {
+                    file = file.getParentFile();
+                }
+                runFolder = file.getPath();
+                File tempFile = new File(runFolder);
+                if (tempFile.isDirectory()) {
+                    runFolder = tempFile.getPath();
+                } else runFolder = null;
+            }
+        } catch (Throwable ignored) {
+            runFolder = null;
+        }
+
+        return runFolder;
+    }
+
     public static String templateFolder() {
         String templateDir;
         try {

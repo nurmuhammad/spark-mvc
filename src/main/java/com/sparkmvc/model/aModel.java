@@ -15,13 +15,15 @@ import java.util.Set;
 
 public abstract class aModel implements Serializable {
 
-    private static final Map<Class<? extends aModel>, Map<String, String>> columnMaps = new HashMap<>();
+    private static Map<Class<? extends aModel>, Map<String, String>> columnMaps;
 
     public static Map<Class<? extends aModel>, Map<String, String>> getColumnMaps() {
 
-        if (!columnMaps.isEmpty()) {
+        if (columnMaps != null) {
             return columnMaps;
         }
+
+        columnMaps = new HashMap<>();
 
         Reflections reflections = new Reflections(Config.get("scan.package", "com"));
 
