@@ -17,16 +17,21 @@ package com.sparkmvc.engine;
  * limitations under the License.
  */
 
+import com.github.mustachejava.DefaultMustacheFactory;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.loader.ClasspathLoader;
 import com.mitchellbosecke.pebble.loader.FileLoader;
 import com.mitchellbosecke.pebble.loader.Loader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import com.sparkmvc.helper.$;
 import com.sparkmvc.init.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.TemplateEngine;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
@@ -38,6 +43,8 @@ import java.util.Map;
  */
 public class PebbleTemplateEngine extends TemplateEngine {
 
+    private static final Logger logger = LoggerFactory.getLogger(PebbleTemplateEngine.class);
+
     /**
      * The Pebble Engine instance.
      */
@@ -47,11 +54,15 @@ public class PebbleTemplateEngine extends TemplateEngine {
      * Construct a new template engine using pebble with a default engine.
      */
     public PebbleTemplateEngine() {
+
+        logger.info("SparkMVC: Seeking Pebble templates folder -------------->");
+
         Loader loader;
-        String dir = Config.get("template.pebble.dir", null);
+        String dir = Config.get("template.pebble.dir", $.templateFolder());
         if (dir != null) {
             loader = new FileLoader();
             loader.setPrefix(dir);
+            logger.info("SparkMVC: Uses '" + dir + "' path for Pebble templates...");
         } else {
             loader = new ClasspathLoader();
         }

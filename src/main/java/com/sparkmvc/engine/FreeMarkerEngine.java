@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import com.sparkmvc.helper.$;
 import com.sparkmvc.init.Config;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.TemplateEngine;
 
@@ -21,6 +24,8 @@ import spark.TemplateEngine;
  * @author Per Wendel
  */
 public class FreeMarkerEngine extends TemplateEngine {
+
+    private static final Logger logger = LoggerFactory.getLogger(FreeMarkerEngine.class);
 
     /**
      * The FreeMarker configuration
@@ -77,11 +82,16 @@ public class FreeMarkerEngine extends TemplateEngine {
     private Configuration createDefaultConfiguration() {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_23);
         configuration.setClassForTemplateLoading(FreeMarkerEngine.class, "");
+
         try {
-            String dir = Config.get("template.freemarker.dir", null);
+
+            logger.info("SparkMVC: Seeking Freemarker template folder -------------->");
+
+            String dir = Config.get("template.freemarker.dir", $.templateFolder());
             if (dir != null) {
                 configuration.setDirectoryForTemplateLoading(new File(dir));
             }
+            logger.info("SparkMVC: Uses '" + dir + "' path for Freemarker templates...");
         } catch (Exception e) {
             e.printStackTrace();
         }

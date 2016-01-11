@@ -21,9 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import com.sparkmvc.helper.$;
 import com.sparkmvc.init.Config;
 import org.eclipse.jetty.io.RuntimeIOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.TemplateEngine;
 
@@ -38,6 +41,8 @@ import com.github.mustachejava.MustacheFactory;
  */
 public class MustacheTemplateEngine extends TemplateEngine {
 
+    private static final Logger logger = LoggerFactory.getLogger(MustacheTemplateEngine.class);
+
     private MustacheFactory mustacheFactory;
 
     /**
@@ -45,11 +50,14 @@ public class MustacheTemplateEngine extends TemplateEngine {
      */
     public MustacheTemplateEngine() {
 
-        String dir = Config.get("template.mustache.dir", null);
+        logger.info("SparkMVC: Seeking Mustache templates folder -------------->");
+
+        String dir = Config.get("template.mustache.dir", $.templateFolder());
         if (dir != null) {
             mustacheFactory = new DefaultMustacheFactory(new File(dir));
+            logger.info("SparkMVC: Uses '" + dir + "' path for Mustache templates...");
         } else {
-            mustacheFactory = new DefaultMustacheFactory("templates");
+            mustacheFactory = new DefaultMustacheFactory("template");
         }
     }
 

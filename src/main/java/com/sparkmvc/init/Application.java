@@ -35,12 +35,12 @@ public class Application {
     public static Map<Class<?>, Object> controllersMap = new HashMap<>();
     public static Map<Template.TemplateEngine, TemplateEngine> templateMap = new HashMap<>();
 
-    static {
-        templateMap.put(Template.TemplateEngine.FREEMARKER, new FreeMarkerEngine());
-        templateMap.put(Template.TemplateEngine.VELOCITY, new VelocityTemplateEngine());
-        templateMap.put(Template.TemplateEngine.MUSTACHE, new MustacheTemplateEngine());
-        templateMap.put(Template.TemplateEngine.PEBBLE, new PebbleTemplateEngine());
-    }
+//    static {
+//        templateMap.put(Template.TemplateEngine.FREEMARKER, new FreeMarkerEngine());
+//        templateMap.put(Template.TemplateEngine.VELOCITY, new VelocityTemplateEngine());
+//        templateMap.put(Template.TemplateEngine.MUSTACHE, new MustacheTemplateEngine());
+//        templateMap.put(Template.TemplateEngine.PEBBLE, new PebbleTemplateEngine());
+//    }
 
     static Map<String, Method> methods = new HashMap<>();
 
@@ -186,13 +186,13 @@ public class Application {
                     return (ModelAndView) result;
                 }
                 return Spark.modelAndView(result, viewName);
-            }, templateMap.get(template.value()));
+            }, getTemplateEngine(template.value()));
             return;
         } else if (template != null) {
 
             final String viewName = template.viewName();
             Method sparkMethod = methods.get(httpMethodName);
-            TemplateEngine engine = templateMap.get(template.value());
+            TemplateEngine engine = getTemplateEngine(template.value());
 
             sparkMethod.invoke(null, path, (Route) (request, response) -> {
                 String cacheKey = cacheKey(instance, request);
@@ -327,6 +327,28 @@ public class Application {
         }
 
         return builder.toString();
+    }
+
+    static TemplateEngine getTemplateEngine(Template.TemplateEngine template) {
+        TemplateEngine templateEngine = templateMap.get(template);
+        if (templateEngine == null) {
+            switch (template) {
+                case VELOCITY:
+                    templateEngine = new VelocityTemplateEngine();
+                    break;
+                case MUSTACHE:
+                    templateEngine = new MustacheTemplateEngine();
+                    break;
+                case PEBBLE:
+                    templateEngine = new PebbleTemplateEngine();
+                    break;
+                default:
+                    templateEngine = new FreeMarkerEngine();
+            }
+            templateMap.put(template, templateEngine);
+        }
+
+        return templateEngine;
     }
 
 }

@@ -17,6 +17,7 @@ public class Cache {
             .closeOnJvmShutdown()
             .cacheLRUEnable()
             .mmapFileEnableIfSupported()
+            .mmapFileEnablePartial()
             .make();
 
     static HTreeMap<String, Object> cacheMap = db.getHashMap("CacheObjects");
@@ -26,7 +27,8 @@ public class Cache {
     public synchronized static Object put(String key, Object value) {
         cacheLifes.remove(key);
         if (value == null) {
-            return cacheMap.remove(key);
+            cacheMap.remove(key);
+            return null;
         }
         cacheMap.put(key, value);
         return value;
