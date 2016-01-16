@@ -6,6 +6,7 @@ import com.sparkmvc.ann.*;
 import com.sparkmvc.engine.FreeMarkerEngine;
 import com.sparkmvc.engine.MustacheTemplateEngine;
 import com.sparkmvc.engine.PebbleTemplateEngine;
+import com.sparkmvc.helper.$;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -249,44 +250,73 @@ public class Application {
 
         logger.info("SparkMVC: Initializing @Before filter to " + instance.getClass().getName() + "." + method.getName());
 
-        if (before.absolutePath() && Constants.NULL_VALUE.equals(before.uri())) {
-            before((request, response) -> methodInvoke(method, instance, request, response));
-            return;
-        }
+        Controller controller = instance.getClass().getAnnotation(Controller.class);
 
-        if (before.absolutePath()) {
-            String path = before.uri().startsWith("/") ? before.uri() : "/" + before.uri();
+        if (before.value().length == 0) {
+            String regex = "([a-z])([A-Z])";
+            String replacement = "$1-$2";
+            String methodUri = method.getName().replaceAll(regex, replacement).toLowerCase();
+            String path = (controller.url() + "/" + methodUri + "/*")
+                    .replaceAll("//", "/").replaceAll("//", "/");
+            path = path.startsWith("/") ? path : "/" + path;
             before(path, (request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
-        Controller controller = instance.getClass().getAnnotation(Controller.class);
-        String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(before.uri()) ? "*" : before.uri()))
-                .replaceAll("//", "/").replaceAll("//", "/");
-        path = path.startsWith("/") ? path : "/" + path;
-        before(path, (request, response) -> methodInvoke(method, instance, request, response));
+        for (Uri uri : before.value()) {
+            if (uri.absolutePath() && Constants.NULL_VALUE.equals(uri.value())) {
+                before((request, response) -> methodInvoke(method, instance, request, response));
+                continue;
+            }
+
+            if (uri.absolutePath()) {
+                String path = uri.value().startsWith("/") ? uri.value() : "/" + uri.value();
+                before(path, (request, response) -> methodInvoke(method, instance, request, response));
+                continue;
+            }
+
+            String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(uri.value()) ? "*" : uri.value()))
+                    .replaceAll("//", "/").replaceAll("//", "/");
+            path = path.startsWith("/") ? path : "/" + path;
+            before(path, (request, response) -> methodInvoke(method, instance, request, response));
+        }
+
     }
 
     public static void initAfterFilter(After after, Object instance, Method method) {
 
         logger.info("SparkMVC: Initializing @After filter to " + instance.getClass().getName() + "." + method.getName());
 
-        if (after.absolutePath() && Constants.NULL_VALUE.equals(after.uri())) {
-            after((request, response) -> methodInvoke(method, instance, request, response));
-            return;
-        }
+        Controller controller = instance.getClass().getAnnotation(Controller.class);
 
-        if (after.absolutePath()) {
-            String path = after.uri().startsWith("/") ? after.uri() : "/" + after.uri();
+        if (after.value().length == 0) {
+            String regex = "([a-z])([A-Z])";
+            String replacement = "$1-$2";
+            String methodUri = method.getName().replaceAll(regex, replacement).toLowerCase();
+            String path = (controller.url() + "/" + methodUri + "/*")
+                    .replaceAll("//", "/").replaceAll("//", "/");
+            path = path.startsWith("/") ? path : "/" + path;
             after(path, (request, response) -> methodInvoke(method, instance, request, response));
             return;
         }
 
-        Controller controller = instance.getClass().getAnnotation(Controller.class);
-        String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(after.uri()) ? "*" : after.uri()))
-                .replaceAll("//", "/").replaceAll("//", "/");
-        path = path.startsWith("/") ? path : "/" + path;
-        after(path, (request, response) -> methodInvoke(method, instance, request, response));
+        for (Uri uri : after.value()) {
+            if (uri.absolutePath() && Constants.NULL_VALUE.equals(uri.value())) {
+                after((request, response) -> methodInvoke(method, instance, request, response));
+                continue;
+            }
+
+            if (uri.absolutePath()) {
+                String path = uri.value().startsWith("/") ? uri.value() : "/" + uri.value();
+                after(path, (request, response) -> methodInvoke(method, instance, request, response));
+                continue;
+            }
+
+            String path = (controller.url() + "/" + (Constants.NULL_VALUE.equals(uri.value()) ? "*" : uri.value()))
+                    .replaceAll("//", "/").replaceAll("//", "/");
+            path = path.startsWith("/") ? path : "/" + path;
+            after(path, (request, response) -> methodInvoke(method, instance, request, response));
+        }
     }
 
     private static Object methodInvoke(Method method, Object instance, Object... args) throws Exception {
@@ -325,17 +355,7 @@ public class Application {
                 .append(".")
                 .append(request.requestMethod())
                 .append(".")
-                .append(request.scheme())
-                .append("://")
-                .append(request.host());
-
-        if (request.pathInfo() != null) {
-            builder.append(request.pathInfo());
-        }
-        if (request.queryString() != null) {
-            builder.append("?")
-                    .append(request.queryString());
-        }
+                .append($.url());
 
         return builder.toString();
     }
