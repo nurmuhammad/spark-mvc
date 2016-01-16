@@ -4,6 +4,10 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.sparkmvc.init.Context;
+import spark.Request;
+import spark.Response;
+import spark.Session;
 
 import java.io.File;
 import java.net.URLDecoder;
@@ -95,5 +99,21 @@ public class $ {
         }
 
         return templateDir;
+    }
+
+    public static <T> T get(Class<T> type) {
+        return Context.get(type);
+    }
+
+    public static Request request() {
+        return Context.get(Request.class);
+    }
+
+    public static Response response() {
+        return Context.get(Response.class);
+    }
+
+    public static Session session() {
+        return Context.get(Session.class);
     }
 }

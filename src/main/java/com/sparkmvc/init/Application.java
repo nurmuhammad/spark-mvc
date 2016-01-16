@@ -49,6 +49,12 @@ public class Application {
 
     public static void init() throws Throwable {
 
+        before((request, response) -> {
+            Context.set(Request.class, request);
+            Context.set(Response.class, response);
+            Context.set(Session.class, request.session());
+        });
+
         collectMethods("get", "put", "post", "delete", "head", "connect", "options", "trace");
 
         Reflections reflections = new Reflections(Config.get("scan.package", "com"), new SubTypesScanner(), new TypeAnnotationsScanner(), new MethodAnnotationsScanner());
@@ -286,7 +292,11 @@ public class Application {
     private static Object methodInvoke(Method method, Object instance, Object... args) throws Exception {
         try {
             method.setAccessible(true);
-            return method.invoke(instance, args);
+            if (method.getParameterCount() > 0) {
+                return method.invoke(instance, args);
+            } else {
+                return method.invoke(instance);
+            }
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof RuntimeException) {
                 throw (RuntimeException) e.getCause();
