@@ -11,6 +11,8 @@ import spark.Session;
 
 import java.io.File;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 
@@ -35,6 +37,14 @@ public class $ {
                 .hash();
 
         return hc.toString();
+    }
+
+    public static String b64encode(String s) {
+        return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String b64decode(String s) {
+        return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
     }
 
     public static String runFolder() {
@@ -115,5 +125,38 @@ public class $ {
 
     public static Session session() {
         return Context.get(Session.class);
+    }
+
+    public static String url() {
+        StringBuilder builder = new StringBuilder(request().scheme())
+                .append("://")
+                .append(request().host());
+
+        if (request().pathInfo() != null) {
+            builder.append(request().pathInfo());
+        }
+        if (request().queryString() != null) {
+            builder.append("?")
+                    .append(request().queryString());
+        }
+
+        return builder.toString();
+    }
+
+    public static String path() {
+        StringBuilder builder = new StringBuilder();
+
+        if (request().pathInfo() != null) {
+            builder.append(request().pathInfo());
+        } else {
+            builder.append("/");
+        }
+
+        if (request().queryString() != null) {
+            builder.append("?")
+                    .append(request().queryString());
+        }
+
+        return builder.toString();
     }
 }
