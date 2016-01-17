@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface HEAD {
-    String uri() default Constants.NULL_VALUE;
+    String value() default Constants.NULL_VALUE;
 
     boolean absolutePath() default false;
 }

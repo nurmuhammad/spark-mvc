@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Created by Nurmuhammad on 10-Jan-16.
+ * @author nurmuhammad
  */
 
 public class $ {

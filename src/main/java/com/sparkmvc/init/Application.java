@@ -37,13 +37,6 @@ public class Application {
     public static Map<Class<?>, Object> controllersMap = new HashMap<>();
     public static Map<Template.TemplateEngine, TemplateEngine> templateMap = new HashMap<>();
 
-//    static {
-//        templateMap.put(Template.TemplateEngine.FREEMARKER, new FreeMarkerEngine());
-//        templateMap.put(Template.TemplateEngine.VELOCITY, new VelocityTemplateEngine());
-//        templateMap.put(Template.TemplateEngine.MUSTACHE, new MustacheTemplateEngine());
-//        templateMap.put(Template.TemplateEngine.PEBBLE, new PebbleTemplateEngine());
-//    }
-
     static Map<String, Method> methods = new HashMap<>();
 
     public static Gson GSON = new GsonBuilder().setExclusionStrategies(new AnnotationSkipStrategy()).create();
@@ -146,7 +139,7 @@ public class Application {
 
             Annotation annotation = method.getAnnotation(annotationClass);
             String httpMethodName = annotation.annotationType().getSimpleName().toLowerCase();
-            Method uriMethod = annotation.getClass().getDeclaredMethod("uri");
+            Method uriMethod = annotation.getClass().getDeclaredMethod("value");
             String uri = (String) uriMethod.invoke(annotation);
             Method absolutePathMethod = annotation.getClass().getDeclaredMethod("absolutePath");
             boolean absolutePath = (boolean) absolutePathMethod.invoke(annotation);
