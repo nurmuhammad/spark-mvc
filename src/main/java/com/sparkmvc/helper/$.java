@@ -47,6 +47,15 @@ public class $ {
         return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
     }
 
+    public static String xor(String input, String KEY) {
+        char[] key = KEY.toCharArray();
+        StringBuilder ret = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            ret.append((char) (input.charAt(i) ^ key[i % key.length]));
+        }
+        return ret.toString();
+    }
+
     public static String runFolder() {
         String runFolder;
         try {
